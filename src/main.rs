@@ -1,16 +1,22 @@
-use ggez::graphics::{self, DrawParam, Drawable, Image};
+use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, Drawable, Image, Rect};
+use ggez::nalgebra::{Point2, Vector2};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
 const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
 
 struct MainState {
+    sprites: Vec<Sprite>,
     sprite_sheet: Image,
 }
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> MainState {
         MainState {
+            sprites: vec![Sprite {
+                src: [0.0, 0.0, 1.0 / 8.0, 1.0 / 8.0].into(),
+                dest: [50.0, 50.0].into(),
+            }],
             sprite_sheet: Image::new(ctx, "/sprites.png").unwrap(),
         }
     }
@@ -22,12 +28,20 @@ impl EventHandler for MainState {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-
         graphics::clear(ctx, graphics::BLACK);
-        self.sprite_sheet.draw(ctx, DrawParam::default()).unwrap();
+        let mut batch = SpriteBatch::new(self.sprite_sheet.clone());
+        for sprite in &self.sprites {
+            batch.add(DrawParam::default().src(sprite.src).dest(sprite.dest));
+        }
+        batch.draw(ctx, DrawParam::default()).unwrap();
         graphics::present(ctx).unwrap();
         Ok(())
     }
+}
+
+struct Sprite {
+    src: Rect,
+    dest: Point2<f32>,
 }
 
 fn main() {
