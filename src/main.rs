@@ -7,7 +7,7 @@ use ggez::nalgebra::{Point2, Vector2};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
-use level::{Level, TileType};
+use level::{Level, TileType, ItemType};
 
 const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
 use gfx::{get_sprite, Sprite, SpriteType};
@@ -15,6 +15,8 @@ use gfx::{get_sprite, Sprite, SpriteType};
 enum ControlType {
     Right,
     Left,
+    Up,
+    Down,
 }
 
 struct Control {
@@ -29,6 +31,8 @@ impl Control {
         match self.control_type {
             ControlType::Right => player.walk(level, Vector2::new(1, 0)),
             ControlType::Left => player.walk(level, Vector2::new(-1, 0)),
+            ControlType::Up => player.walk(level, Vector2::new(0, -1)),
+            ControlType::Down => player.walk(level, Vector2::new(0, 1)),
         };
     }
 
@@ -40,6 +44,7 @@ impl Control {
 struct Player {
     pos: Point2<usize>,
     sprite: Sprite,
+    pending_items: Vec<ItemType>,
 }
 
 impl Player {
@@ -52,6 +57,9 @@ impl Player {
             TileType::Exit => panic!("You win!"),
         };
         self.pos = new_pos;
+        if let Some(item) = level.items.remove(&(x, y)) {
+            self.pending_items.push(item.item_type);
+        }
     }
 }
 
@@ -71,22 +79,45 @@ impl MainState {
             player: Player {
                 pos: level.player_start,
                 sprite: get_sprite(SpriteType::Player),
+                pending_items: Vec::new(),
             },
             level,
             controls: [
                 Some(Control {
-                    energy: 10,
+                    energy: 50,
                     control_type: ControlType::Left,
                 }),
                 None,
                 None,
                 Some(Control {
-                    energy: 13,
+                    energy: 50,
                     control_type: ControlType::Right,
                 }),
             ],
             key_presses: Vec::new(),
         })
+    }
+
+
+}
+
+fn add_control(controls: &mut [Option<Control>] , item_type:ItemType) {
+    let control_type = match item_type {
+        ItemType::UpControl => ControlType::Up,
+        ItemType::DownControl => ControlType::Down,
+    };
+    let control = Control {
+        energy : 10,
+        control_type,
+    };
+    for control_holder in controls.iter_mut() {
+        match control_holder {
+            Some(_) => {},
+            None => {
+                *control_holder = Some(control);
+                break;
+            },
+        }
     }
 }
 
@@ -111,6 +142,9 @@ impl EventHandler for MainState {
                 }
             }
         });
+        for item_type in self.player.pending_items.drain(..) {
+            add_control(&mut self.controls, item_type);
+        }
         Ok(())
     }
 

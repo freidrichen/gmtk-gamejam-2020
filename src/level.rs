@@ -39,9 +39,10 @@ impl Tile {
 
 pub struct Item {
     pub sprite: Sprite,
+    pub item_type: ItemType,
 }
 
-enum ItemType {
+pub enum ItemType {
     DownControl,
     UpControl,
 }
@@ -54,6 +55,7 @@ impl Item {
         };
         Item {
             sprite: get_sprite(sprite_type),
+            item_type,
         }
     }
 }
