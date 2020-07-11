@@ -1,5 +1,5 @@
 mod level;
-mod sprite;
+mod gfx;
 
 use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, Drawable, Image};
 use ggez::nalgebra::{Point2, Vector2};
@@ -7,9 +7,9 @@ use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
 use level::Level;
-use sprite::{get_sprite, Sprite, SpriteType};
 
 const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
+use gfx::{get_sprite, Sprite, SpriteType};
 
 enum ControlType {
     Right,
@@ -112,17 +112,17 @@ impl EventHandler for MainState {
                 batch.add(
                     DrawParam::default()
                         .src(self.level.get(tile_x, tile_y).unwrap().sprite)
-                        .dest(sprite::screen_pos([tile_x, tile_y].into())),
+                        .dest(gfx::screen_pos([tile_x, tile_y].into())),
                 );
             }
         }
         batch.add(
             DrawParam::default()
                 .src(self.player.sprite)
-                .dest(sprite::screen_pos(self.player.pos)),
+                .dest(gfx::screen_pos(self.player.pos)),
         );
         batch
-            .draw(ctx, DrawParam::default().scale([2.0, 2.0]))
+            .draw(ctx, DrawParam::default().scale([gfx::SPRITE_SCALE, gfx::SPRITE_SCALE]))
             .unwrap();
         graphics::present(ctx).unwrap();
         Ok(())

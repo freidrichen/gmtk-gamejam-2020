@@ -4,7 +4,7 @@ use ggez::{Context, GameResult};
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
-use crate::sprite::{get_sprite, Sprite, SpriteType};
+use crate::gfx::{get_sprite, Sprite, SpriteType};
 
 const LEVEL_WIDTH: usize = 40;
 const LEVEL_HEIGHT: usize = 30;
