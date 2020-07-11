@@ -7,7 +7,7 @@ use ggez::nalgebra::{Point2, Vector2};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
-use level::Level;
+use level::{Level, TileType};
 
 const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
 use gfx::{get_sprite, Sprite, SpriteType};
@@ -23,12 +23,12 @@ struct Control {
 }
 
 impl Control {
-    fn activate(&mut self, player: &mut Player) {
+    fn activate(&mut self, player: &mut Player, level: &mut Level) {
         assert!(self.energy > 0);
         self.energy -= 1;
         match self.control_type {
-            ControlType::Right => player.pos += Vector2::new(1, 0),
-            ControlType::Left => player.pos -= Vector2::new(1, 0),
+            ControlType::Right => player.walk(level, Vector2::new(1, 0)),
+            ControlType::Left => player.walk(level, Vector2::new(-1, 0)),
         };
     }
 
@@ -43,8 +43,15 @@ struct Player {
 }
 
 impl Player {
-    fn update(&mut self, _ctx: &Context) -> GameResult<()> {
-        Ok(())
+    fn walk(&mut self, level: &mut Level, delta: Vector2<isize>) {
+        let x = (self.pos.x as isize + delta.x) as usize;
+        let y = (self.pos.y as isize + delta.y) as usize;
+        let new_pos = match level.get(x, y).unwrap().tile_type {
+            TileType::Wall => self.pos,
+            TileType::Floor => Point2::new(x, y),
+            TileType::Exit => panic!("You win!"),
+        };
+        self.pos = new_pos;
     }
 }
 
@@ -85,7 +92,6 @@ impl MainState {
 
 impl EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.player.update(ctx)?;
         for keycode in self.key_presses.drain(..) {
             let control_index = match keycode {
                 KeyCode::H => 0,
@@ -95,7 +101,7 @@ impl EventHandler for MainState {
                 _ => continue,
             };
             if let Some(Some(control)) = self.controls.get_mut(control_index) {
-                control.activate(&mut self.player);
+                control.activate(&mut self.player, &mut self.level);
             }
         }
         self.controls.iter_mut().for_each(|c| {
@@ -123,8 +129,9 @@ impl EventHandler for MainState {
         for (&(x, y), item) in &self.level.items {
             batch.add(
                 DrawParam::default()
-                .src(item.sprite)
-                .dest(gfx::screen_pos(Point2::new(x,y))));
+                    .src(item.sprite)
+                    .dest(gfx::screen_pos(Point2::new(x, y))),
+            );
         }
         batch.add(
             DrawParam::default()

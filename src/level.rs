@@ -41,8 +41,7 @@ pub struct Item {
     pub sprite: Sprite,
 }
 
-enum ItemType
-{
+enum ItemType {
     DownControl,
     UpControl,
 }
@@ -54,7 +53,7 @@ impl Item {
             ItemType::UpControl => SpriteType::UpControl,
         };
         Item {
-            sprite: get_sprite(sprite_type)
+            sprite: get_sprite(sprite_type),
         }
     }
 }
@@ -100,14 +99,16 @@ impl Level {
         match c {
             '@' => {
                 self.player_start = Point2::new(col, row);
-            },
+            }
             'a' => {
-                self.items.insert((col, row), Item::new(ItemType::DownControl));
-            },
+                self.items
+                    .insert((col, row), Item::new(ItemType::DownControl));
+            }
             'b' => {
-                self.items.insert((col, row), Item::new(ItemType::UpControl));
-            },
-            _ => {},
+                self.items
+                    .insert((col, row), Item::new(ItemType::UpControl));
+            }
+            _ => {}
         }
     }
     fn get_mut(&mut self, x: usize, y: usize) -> Option<&mut Tile> {
