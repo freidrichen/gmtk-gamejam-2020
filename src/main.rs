@@ -84,13 +84,13 @@ impl MainState {
             level,
             controls: [
                 Some(Control {
-                    energy: 50,
+                    energy: 15,
                     control_type: ControlType::Left,
                 }),
                 None,
                 None,
                 Some(Control {
-                    energy: 50,
+                    energy: 10,
                     control_type: ControlType::Right,
                 }),
             ],
@@ -98,7 +98,9 @@ impl MainState {
         })
     }
 
-
+    fn out_of_control(&self) -> bool {
+        self.controls.iter().all(|c| c.is_none())
+    }
 }
 
 fn add_control(controls: &mut [Option<Control>] , item_type:ItemType) {
@@ -122,7 +124,7 @@ fn add_control(controls: &mut [Option<Control>] , item_type:ItemType) {
 }
 
 impl EventHandler for MainState {
-    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
         for keycode in self.key_presses.drain(..) {
             let control_index = match keycode {
                 KeyCode::H => 0,
@@ -144,6 +146,9 @@ impl EventHandler for MainState {
         });
         for item_type in self.player.pending_items.drain(..) {
             add_control(&mut self.controls, item_type);
+        }
+        if self.out_of_control() {
+            panic!("You are out of controls! You lose!")
         }
         Ok(())
     }
