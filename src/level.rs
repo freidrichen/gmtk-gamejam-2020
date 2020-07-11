@@ -11,21 +11,28 @@ const LEVEL_WIDTH: usize = 40;
 const LEVEL_HEIGHT: usize = 30;
 
 #[derive(Clone, Copy)]
+pub enum TileType {
+    Wall,
+    Floor,
+    Exit,
+}
+
+#[derive(Clone, Copy)]
 pub struct Tile {
     pub sprite: Sprite,
-    pub passable: bool,
+    pub tile_type: TileType,
 }
 
 impl Tile {
-    fn new(passable: bool) -> Tile {
-        let sprite_type = if passable {
-            SpriteType::Floor
-        } else {
-            SpriteType::Wall
+    fn new(tile_type: TileType) -> Tile {
+        let sprite_type = match tile_type {
+            TileType::Floor => SpriteType::Floor,
+            TileType::Wall => SpriteType::Wall,
+            TileType::Exit => SpriteType::Exit,
         };
         Tile {
             sprite: get_sprite(sprite_type),
-            passable,
+            tile_type,
         }
     }
 }
@@ -66,7 +73,7 @@ impl Level {
             width: LEVEL_WIDTH,
             height: LEVEL_HEIGHT,
             player_start: Point2::new(0, 0),
-            tiles: vec![Tile::new(true); LEVEL_WIDTH * LEVEL_HEIGHT],
+            tiles: vec![Tile::new(TileType::Floor); LEVEL_WIDTH * LEVEL_HEIGHT],
             items: HashMap::new(),
         }
     }
@@ -86,9 +93,9 @@ impl Level {
     fn set_from_char(&mut self, col: usize, row: usize, c: char) {
         let tile = self.get_mut(col, row).unwrap();
         *tile = match c {
-            '#' => Tile::new(false),
-            //'>' => Tile::new(Downstairs),
-            _ => Tile::new(true),
+            '#' => Tile::new(TileType::Wall),
+            '>' => Tile::new(TileType::Exit),
+            _ => Tile::new(TileType::Floor),
         };
         match c {
             '@' => {

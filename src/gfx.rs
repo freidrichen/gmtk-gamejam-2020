@@ -13,6 +13,7 @@ pub enum SpriteType {
     Player,
     Wall,
     Floor,
+    Exit,
     DownControl,
     UpControl,
 }
@@ -29,6 +30,7 @@ pub fn get_sprite(sprite_type: SpriteType) -> Rect {
         SpriteType::Player => 8,
         SpriteType::Wall => 0,
         SpriteType::Floor => 1,
+        SpriteType::Exit => 2,
         SpriteType::DownControl => 34,
         SpriteType::UpControl => 32,
     };
