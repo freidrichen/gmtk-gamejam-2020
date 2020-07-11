@@ -1,7 +1,11 @@
+mod level;
+
 use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, Drawable, Image, Rect};
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
+
+use level::Level;
 
 const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
 const NUM_SPRITES_X: f32 = 8.0;
@@ -46,6 +50,7 @@ impl Player {
 struct MainState {
     sprite_sheet: Image,
     player: Player,
+    level: Level,
     controls: Vec<Control>,
 }
 
@@ -57,6 +62,7 @@ impl MainState {
                 pos: [50.0, 50.0].into(),
                 src_rect: [0.0, 0.0, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
             },
+            level: Level::new(),
             controls: vec![
                 Control { energy: 13, control_type: ControlType::Right },
                 Control { energy: 10, control_type: ControlType::Left },
@@ -91,6 +97,17 @@ impl EventHandler for MainState {
                 .src(self.player.src_rect)
                 .dest(self.player.pos),
         );
+        for y in 0..self.level.height{
+            for x in 0..self.level.width {
+                let screen_x = (x as f32) * 8.0;
+                let screen_y = (y as f32) * 8.0;
+                batch.add(
+                    DrawParam::default()
+                        .src(self.level.get(x, y).unwrap().src_rect)
+                        .dest(Point2::new(screen_x, screen_y))
+                );
+            }
+        }
         batch
             .draw(ctx, DrawParam::default().scale([2.0, 2.0]))
             .unwrap();
