@@ -7,17 +7,26 @@ const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
 const NUM_SPRITES_X: f32 = 8.0;
 const NUM_SPRITES_Y: f32 = 8.0;
 
+trait Control {
+    fn activate(&mut self, player:&mut Player) -> GameResult<()>;
+}
+
+struct RightControl {}
+
+impl Control for RightControl {
+    fn activate(&mut self, player: &mut Player) -> GameResult<()> {
+        player.pos += Vector2::new(10.0, 0.0);
+        Ok(())
+    }
+}
+
 struct Player {
     pos: Point2<f32>,
     src_rect: Rect,
 }
 
 impl Player {
-    fn update(&mut self, ctx: &Context) -> GameResult<()> {
-        let keys = ggez::input::keyboard::pressed_keys(ctx);
-        if keys.contains(&ggez::input::keyboard::KeyCode::L) {
-            self.pos = self.pos + Vector2::new(10.0, 0.0);
-        }
+    fn update(&mut self, _ctx: &Context) -> GameResult<()> {
         Ok(())
     }
 }
@@ -25,6 +34,7 @@ impl Player {
 struct MainState {
     sprite_sheet: Image,
     player: Player,
+    controls: Vec<Box<dyn Control>>
 }
 
 impl MainState {
@@ -35,13 +45,19 @@ impl MainState {
                 pos: [50.0, 50.0].into(),
                 src_rect: [0.0, 0.0, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
             },
+            controls: vec![Box::new(RightControl{})],
         }
     }
 }
 
 impl EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.player.update(ctx)
+        self.player.update(ctx)?;
+        let keys = ggez::input::keyboard::pressed_keys(ctx);
+        if keys.contains(&ggez::input::keyboard::KeyCode::L) {
+            self.controls[0].activate(&mut self.player)?;
+        }
+        Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
