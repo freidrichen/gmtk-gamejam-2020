@@ -13,6 +13,8 @@ pub enum SpriteType {
     Player,
     Wall,
     Floor,
+    DownControl,
+    UpControl,
 }
 
 pub fn screen_pos(tile_pos: Point2<usize>) -> Point2<f32> {
@@ -27,6 +29,8 @@ pub fn get_sprite(sprite_type: SpriteType) -> Rect {
         SpriteType::Player => 8,
         SpriteType::Wall => 0,
         SpriteType::Floor => 1,
+        SpriteType::DownControl => 34,
+        SpriteType::UpControl => 32,
     };
     let row = index / NUM_SPRITES_X;
     let col = index % NUM_SPRITES_X;

@@ -1,9 +1,9 @@
-mod level;
 mod gfx;
+mod level;
 
 use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, Drawable, Image};
-use ggez::nalgebra::{Point2, Vector2};
 use ggez::input::keyboard::{KeyCode, KeyMods};
+use ggez::nalgebra::{Point2, Vector2};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
@@ -120,19 +120,34 @@ impl EventHandler for MainState {
                 );
             }
         }
+        for (&(x, y), item) in &self.level.items {
+            batch.add(
+                DrawParam::default()
+                .src(item.sprite)
+                .dest(gfx::screen_pos(Point2::new(x,y))));
+        }
         batch.add(
             DrawParam::default()
                 .src(self.player.sprite)
                 .dest(gfx::screen_pos(self.player.pos)),
         );
         batch
-            .draw(ctx, DrawParam::default().scale([gfx::SPRITE_SCALE, gfx::SPRITE_SCALE]))
+            .draw(
+                ctx,
+                DrawParam::default().scale([gfx::SPRITE_SCALE, gfx::SPRITE_SCALE]),
+            )
             .unwrap();
         graphics::present(ctx).unwrap();
         Ok(())
     }
 
-    fn key_down_event(&mut self, _ctx: &mut Context, keycode: KeyCode, _keymods: KeyMods, _repeat: bool) {
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: KeyCode,
+        _keymods: KeyMods,
+        _repeat: bool,
+    ) {
         self.key_presses.push(keycode);
     }
 }

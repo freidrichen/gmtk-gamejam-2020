@@ -1,6 +1,7 @@
 use ggez::filesystem;
 use ggez::nalgebra::Point2;
 use ggez::{Context, GameResult};
+use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
@@ -29,11 +30,34 @@ impl Tile {
     }
 }
 
+pub struct Item {
+    pub sprite: Sprite,
+}
+
+enum ItemType
+{
+    DownControl,
+    UpControl,
+}
+
+impl Item {
+    fn new(item_type: ItemType) -> Item {
+        let sprite_type = match item_type {
+            ItemType::DownControl => SpriteType::DownControl,
+            ItemType::UpControl => SpriteType::UpControl,
+        };
+        Item {
+            sprite: get_sprite(sprite_type)
+        }
+    }
+}
+
 pub struct Level {
     pub width: usize,
     pub height: usize,
     pub player_start: Point2<usize>,
     tiles: Vec<Tile>,
+    pub items: HashMap<(usize, usize), Item>,
 }
 
 impl Level {
@@ -43,6 +67,7 @@ impl Level {
             height: LEVEL_HEIGHT,
             player_start: Point2::new(0, 0),
             tiles: vec![Tile::new(true); LEVEL_WIDTH * LEVEL_HEIGHT],
+            items: HashMap::new(),
         }
     }
 
@@ -62,10 +87,20 @@ impl Level {
         let tile = self.get_mut(col, row).unwrap();
         *tile = match c {
             '#' => Tile::new(false),
+            //'>' => Tile::new(Downstairs),
             _ => Tile::new(true),
         };
-        if c == '@' {
-            self.player_start = Point2::new(col, row);
+        match c {
+            '@' => {
+                self.player_start = Point2::new(col, row);
+            },
+            'a' => {
+                self.items.insert((col, row), Item::new(ItemType::DownControl));
+            },
+            'b' => {
+                self.items.insert((col, row), Item::new(ItemType::UpControl));
+            },
+            _ => {},
         }
     }
     fn get_mut(&mut self, x: usize, y: usize) -> Option<&mut Tile> {
