@@ -26,8 +26,8 @@ impl Control {
         assert!(self.energy > 0);
         self.energy -= 1;
         match self.control_type {
-            ControlType::Right => player.pos += Vector2::new(10.0, 0.0),
-            ControlType::Left => player.pos += Vector2::new(-10.0, 0.0),
+            ControlType::Right => player.pos += Vector2::new(1, 0),
+            ControlType::Left => player.pos -= Vector2::new(1, 0),
         };
     }
 
@@ -37,7 +37,7 @@ impl Control {
 }
 
 struct Player {
-    pos: Point2<f32>,
+    pos: Point2<usize>,
     src_rect: Rect,
 }
 
@@ -59,8 +59,8 @@ impl MainState {
         Ok(MainState {
             sprite_sheet: Image::new(ctx, "/sprites.png")?,
             player: Player {
-                pos: [64.0, 64.0].into(),
-                src_rect: [0.0, 0.0, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
+                pos: [5, 5].into(),
+                src_rect: [0.5, 0.5, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
             },
             level: Level::load(ctx, "/level.txt")?,
             controls: [
@@ -71,6 +71,10 @@ impl MainState {
             ],
         })
     }
+}
+
+fn screen_pos(tile_pos: Point2<usize>) -> Point2<f32> {
+    Point2::new(tile_pos.x as f32 * 8.0, tile_pos.y as f32 * 8.0)
 }
 
 impl EventHandler for MainState {
@@ -113,7 +117,7 @@ impl EventHandler for MainState {
         batch.add(
             DrawParam::default()
                 .src(self.player.src_rect)
-                .dest(self.player.pos),
+                .dest(screen_pos(self.player.pos)),
         );
         batch
             .draw(ctx, DrawParam::default().scale([2.0, 2.0]))
