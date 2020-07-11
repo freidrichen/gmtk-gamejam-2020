@@ -55,21 +55,21 @@ struct MainState {
 }
 
 impl MainState {
-    pub fn new(ctx: &mut Context) -> MainState {
-        MainState {
-            sprite_sheet: Image::new(ctx, "/sprites.png").unwrap(),
+    pub fn new(ctx: &mut Context) -> GameResult<MainState> {
+        Ok(MainState {
+            sprite_sheet: Image::new(ctx, "/sprites.png")?,
             player: Player {
-                pos: [50.0, 50.0].into(),
+                pos: [64.0, 64.0].into(),
                 src_rect: [0.0, 0.0, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
             },
-            level: Level::new(),
+            level: Level::load(ctx, "/level.txt")?,
             controls: [
                 Some(Control { energy: 13, control_type: ControlType::Right }),
                 Some(Control { energy: 10, control_type: ControlType::Left }),
                 None,
                 None,
             ],
-        }
+        })
     }
 }
 
@@ -99,13 +99,13 @@ impl EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::BLACK);
         let mut batch = SpriteBatch::new(self.sprite_sheet.clone());
-        for y in 0..self.level.height{
-            for x in 0..self.level.width {
-                let screen_x = (x as f32) * 8.0;
-                let screen_y = (y as f32) * 8.0;
+        for tile_y in 0..self.level.height{
+            for tile_x in 0..self.level.width {
+                let screen_x = tile_x as f32 * 8.0;
+                let screen_y = tile_y as f32 * 8.0;
                 batch.add(
                     DrawParam::default()
-                        .src(self.level.get(x, y).unwrap().src_rect)
+                        .src(self.level.get(tile_x, tile_y).unwrap().src_rect)
                         .dest(Point2::new(screen_x, screen_y))
                 );
             }
@@ -143,7 +143,7 @@ fn main() {
 
     graphics::set_default_filter(&mut ctx, graphics::FilterMode::Nearest);
 
-    let mut main_state = MainState::new(&mut ctx);
+    let mut main_state = MainState::new(&mut ctx).unwrap();
 
     match ggez::event::run(&mut ctx, &mut event_loop, &mut main_state) {
         Ok(_) => println!("Exited cleanly."),
