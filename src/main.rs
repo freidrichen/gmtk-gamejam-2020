@@ -3,6 +3,7 @@ mod gfx;
 
 use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, Drawable, Image};
 use ggez::nalgebra::{Point2, Vector2};
+use ggez::input::keyboard::{KeyCode, KeyMods};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
@@ -49,6 +50,7 @@ impl Player {
 
 struct MainState {
     sprite_sheet: Image,
+    key_presses: Vec<KeyCode>,
     player: Player,
     level: Level,
     controls: [Option<Control>; 4],
@@ -66,16 +68,17 @@ impl MainState {
             level,
             controls: [
                 Some(Control {
-                    energy: 13,
-                    control_type: ControlType::Right,
-                }),
-                Some(Control {
                     energy: 10,
                     control_type: ControlType::Left,
                 }),
                 None,
                 None,
+                Some(Control {
+                    energy: 13,
+                    control_type: ControlType::Right,
+                }),
             ],
+            key_presses: Vec::new(),
         })
     }
 }
@@ -83,14 +86,15 @@ impl MainState {
 impl EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.player.update(ctx)?;
-        let keys = ggez::input::keyboard::pressed_keys(ctx);
-        if keys.contains(&ggez::input::keyboard::KeyCode::L) {
-            if let Some(Some(control)) = self.controls.get_mut(0) {
-                control.activate(&mut self.player);
-            }
-        }
-        if keys.contains(&ggez::input::keyboard::KeyCode::H) {
-            if let Some(Some(control)) = self.controls.get_mut(1) {
+        for keycode in self.key_presses.drain(..) {
+            let control_index = match keycode {
+                KeyCode::H => 0,
+                KeyCode::J => 1,
+                KeyCode::K => 2,
+                KeyCode::L => 3,
+                _ => continue,
+            };
+            if let Some(Some(control)) = self.controls.get_mut(control_index) {
                 control.activate(&mut self.player);
             }
         }
@@ -126,6 +130,10 @@ impl EventHandler for MainState {
             .unwrap();
         graphics::present(ctx).unwrap();
         Ok(())
+    }
+
+    fn key_down_event(&mut self, _ctx: &mut Context, keycode: KeyCode, _keymods: KeyMods, _repeat: bool) {
+        self.key_presses.push(keycode);
     }
 }
 
