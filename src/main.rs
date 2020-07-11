@@ -7,20 +7,24 @@ const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
 const NUM_SPRITES_X: f32 = 8.0;
 const NUM_SPRITES_Y: f32 = 8.0;
 
-trait Control {
-    fn activate(&mut self, player: &mut Player);
-    fn has_energy(&self) -> bool;
+enum ControlType {
+    Right,
+    Left,
 }
 
-struct RightControl {
+struct Control {
     energy: u32,
+    control_type: ControlType,
 }
 
-impl Control for RightControl {
+impl Control {
     fn activate(&mut self, player: &mut Player) {
         assert!(self.energy > 0);
-        player.pos += Vector2::new(10.0, 0.0);
         self.energy -= 1;
+        match self.control_type {
+            ControlType::Right => player.pos += Vector2::new(10.0, 0.0),
+            ControlType::Left => player.pos += Vector2::new(-10.0, 0.0),
+        };
     }
 
     fn has_energy(&self) -> bool {
@@ -42,7 +46,7 @@ impl Player {
 struct MainState {
     sprite_sheet: Image,
     player: Player,
-    controls: Vec<Box<dyn Control>>,
+    controls: Vec<Control>,
 }
 
 impl MainState {
@@ -53,7 +57,10 @@ impl MainState {
                 pos: [50.0, 50.0].into(),
                 src_rect: [0.0, 0.0, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
             },
-            controls: vec![Box::new(RightControl { energy: 3 })],
+            controls: vec![
+                Control { energy: 13, control_type: ControlType::Right },
+                Control { energy: 10, control_type: ControlType::Left },
+            ],
         }
     }
 }
@@ -64,6 +71,11 @@ impl EventHandler for MainState {
         let keys = ggez::input::keyboard::pressed_keys(ctx);
         if keys.contains(&ggez::input::keyboard::KeyCode::L) {
             if let Some(control) = self.controls.get_mut(0) {
+                control.activate(&mut self.player);
+            }
+        }
+        if keys.contains(&ggez::input::keyboard::KeyCode::H) {
+            if let Some(control) = self.controls.get_mut(1) {
                 control.activate(&mut self.player);
             }
         }
