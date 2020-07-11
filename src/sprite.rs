@@ -1,7 +1,10 @@
 use ggez::graphics::Rect;
+use ggez::nalgebra::Point2;
 
 const NUM_SPRITES_X: usize = 8;
 const NUM_SPRITES_Y: usize = 8;
+const SPRITE_WIDTH: usize = 8;
+const SPRITE_HEIGHT: usize = 8;
 
 pub type Sprite = Rect;
 
@@ -9,6 +12,13 @@ pub enum SpriteType {
     Player,
     Wall,
     Floor,
+}
+
+pub fn screen_pos(tile_pos: Point2<usize>) -> Point2<f32> {
+    Point2::new(
+        (tile_pos.x * SPRITE_WIDTH) as f32,
+        (tile_pos.y * SPRITE_HEIGHT) as f32,
+    )
 }
 
 pub fn get_sprite(sprite_type: SpriteType) -> Rect {

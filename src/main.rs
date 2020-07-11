@@ -80,10 +80,6 @@ impl MainState {
     }
 }
 
-fn screen_pos(tile_pos: Point2<usize>) -> Point2<f32> {
-    Point2::new(tile_pos.x as f32 * 8.0, tile_pos.y as f32 * 8.0)
-}
-
 impl EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.player.update(ctx)?;
@@ -113,19 +109,17 @@ impl EventHandler for MainState {
         let mut batch = SpriteBatch::new(self.sprite_sheet.clone());
         for tile_y in 0..self.level.height {
             for tile_x in 0..self.level.width {
-                let screen_x = tile_x as f32 * 8.0;
-                let screen_y = tile_y as f32 * 8.0;
                 batch.add(
                     DrawParam::default()
                         .src(self.level.get(tile_x, tile_y).unwrap().sprite)
-                        .dest(Point2::new(screen_x, screen_y)),
+                        .dest(sprite::screen_pos([tile_x, tile_y].into())),
                 );
             }
         }
         batch.add(
             DrawParam::default()
                 .src(self.player.sprite)
-                .dest(screen_pos(self.player.pos)),
+                .dest(sprite::screen_pos(self.player.pos)),
         );
         batch
             .draw(ctx, DrawParam::default().scale([2.0, 2.0]))
