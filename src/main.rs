@@ -51,7 +51,7 @@ struct MainState {
     sprite_sheet: Image,
     player: Player,
     level: Level,
-    controls: Vec<Control>,
+    controls: [Option<Control>; 4],
 }
 
 impl MainState {
@@ -63,9 +63,11 @@ impl MainState {
                 src_rect: [0.0, 0.0, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
             },
             level: Level::new(),
-            controls: vec![
-                Control { energy: 13, control_type: ControlType::Right },
-                Control { energy: 10, control_type: ControlType::Left },
+            controls: [
+                Some(Control { energy: 13, control_type: ControlType::Right }),
+                Some(Control { energy: 10, control_type: ControlType::Left }),
+                None,
+                None,
             ],
         }
     }
@@ -76,27 +78,27 @@ impl EventHandler for MainState {
         self.player.update(ctx)?;
         let keys = ggez::input::keyboard::pressed_keys(ctx);
         if keys.contains(&ggez::input::keyboard::KeyCode::L) {
-            if let Some(control) = self.controls.get_mut(0) {
+            if let Some(Some(control)) = self.controls.get_mut(0) {
                 control.activate(&mut self.player);
             }
         }
         if keys.contains(&ggez::input::keyboard::KeyCode::H) {
-            if let Some(control) = self.controls.get_mut(1) {
+            if let Some(Some(control)) = self.controls.get_mut(1) {
                 control.activate(&mut self.player);
             }
         }
-        self.controls.retain(|c| c.has_energy());
+        self.controls.iter_mut().for_each(|c| {
+            if let Some(control) = c {
+                if !control.has_energy() {
+                    *c = None
+                }
+            }});
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::BLACK);
         let mut batch = SpriteBatch::new(self.sprite_sheet.clone());
-        batch.add(
-            DrawParam::default()
-                .src(self.player.src_rect)
-                .dest(self.player.pos),
-        );
         for y in 0..self.level.height{
             for x in 0..self.level.width {
                 let screen_x = (x as f32) * 8.0;
@@ -108,6 +110,11 @@ impl EventHandler for MainState {
                 );
             }
         }
+        batch.add(
+            DrawParam::default()
+                .src(self.player.src_rect)
+                .dest(self.player.pos),
+        );
         batch
             .draw(ctx, DrawParam::default().scale([2.0, 2.0]))
             .unwrap();

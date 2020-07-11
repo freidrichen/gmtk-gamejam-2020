@@ -1,5 +1,4 @@
 use ggez::graphics::{Rect};
-use std::convert::TryInto;
 
 const LEVEL_WIDTH : usize =  40;
 const LEVEL_HEIGHT: usize = 30;
