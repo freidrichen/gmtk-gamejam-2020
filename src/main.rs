@@ -56,16 +56,23 @@ struct MainState {
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> GameResult<MainState> {
+        let level = Level::load(ctx, "/level.txt")?;
         Ok(MainState {
             sprite_sheet: Image::new(ctx, "/sprites.png")?,
             player: Player {
-                pos: [5, 5].into(),
+                pos: level.player_start,
                 src_rect: [0.5, 0.5, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
             },
-            level: Level::load(ctx, "/level.txt")?,
+            level,
             controls: [
-                Some(Control { energy: 13, control_type: ControlType::Right }),
-                Some(Control { energy: 10, control_type: ControlType::Left }),
+                Some(Control {
+                    energy: 13,
+                    control_type: ControlType::Right,
+                }),
+                Some(Control {
+                    energy: 10,
+                    control_type: ControlType::Left,
+                }),
                 None,
                 None,
             ],
@@ -96,21 +103,22 @@ impl EventHandler for MainState {
                 if !control.has_energy() {
                     *c = None
                 }
-            }});
+            }
+        });
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::BLACK);
         let mut batch = SpriteBatch::new(self.sprite_sheet.clone());
-        for tile_y in 0..self.level.height{
+        for tile_y in 0..self.level.height {
             for tile_x in 0..self.level.width {
                 let screen_x = tile_x as f32 * 8.0;
                 let screen_y = tile_y as f32 * 8.0;
                 batch.add(
                     DrawParam::default()
                         .src(self.level.get(tile_x, tile_y).unwrap().src_rect)
-                        .dest(Point2::new(screen_x, screen_y))
+                        .dest(Point2::new(screen_x, screen_y)),
                 );
             }
         }

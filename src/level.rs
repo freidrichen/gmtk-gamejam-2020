@@ -1,10 +1,11 @@
-use ggez::graphics::Rect;
 use ggez::filesystem;
+use ggez::graphics::Rect;
+use ggez::nalgebra::Point2;
 use ggez::{Context, GameResult};
-use std::path::Path;
 use std::io::{BufRead, BufReader};
+use std::path::Path;
 
-const LEVEL_WIDTH : usize =  40;
+const LEVEL_WIDTH: usize = 40;
 const LEVEL_HEIGHT: usize = 30;
 const NUM_SPRITES_X: usize = 8;
 const NUM_SPRITES_Y: usize = 8;
@@ -40,6 +41,7 @@ impl Tile {
 pub struct Level {
     pub width: usize,
     pub height: usize,
+    pub player_start: Point2<usize>,
     tiles: Vec<Tile>,
 }
 
@@ -48,9 +50,8 @@ impl Level {
         Level {
             width: LEVEL_WIDTH,
             height: LEVEL_HEIGHT,
-            tiles : vec![
-                Tile::new(true);
-                LEVEL_WIDTH*LEVEL_HEIGHT],
+            player_start: Point2::new(0, 0),
+            tiles: vec![Tile::new(true); LEVEL_WIDTH * LEVEL_HEIGHT],
         }
     }
 
@@ -60,14 +61,22 @@ impl Level {
         let mut level = Level::new();
         for (row, line) in reader.lines().enumerate() {
             for (col, c) in line.unwrap().chars().enumerate() {
-                if let Some(tile) = level.get_mut(col, row) {
-                    *tile = Tile::new(c == '#')
-                }
+                level.set_from_char(col, row, c);
             }
         }
         Ok(level)
     }
 
+    fn set_from_char(&mut self, col: usize, row: usize, c: char) {
+        let tile = self.get_mut(col, row).unwrap();
+        *tile = match c {
+            '#' => Tile::new(false),
+            _ => Tile::new(true),
+        };
+        if c == '@' {
+            self.player_start = Point2::new(col, row);
+        }
+    }
     fn get_mut(&mut self, x: usize, y: usize) -> Option<&mut Tile> {
         self.tiles.get_mut(self.width * y + x)
     }
