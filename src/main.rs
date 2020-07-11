@@ -8,15 +8,23 @@ const NUM_SPRITES_X: f32 = 8.0;
 const NUM_SPRITES_Y: f32 = 8.0;
 
 trait Control {
-    fn activate(&mut self, player:&mut Player) -> GameResult<()>;
+    fn activate(&mut self, player: &mut Player);
+    fn has_energy(&self) -> bool;
 }
 
-struct RightControl {}
+struct RightControl {
+    energy: u32,
+}
 
 impl Control for RightControl {
-    fn activate(&mut self, player: &mut Player) -> GameResult<()> {
+    fn activate(&mut self, player: &mut Player) {
+        assert!(self.energy > 0);
         player.pos += Vector2::new(10.0, 0.0);
-        Ok(())
+        self.energy -= 1;
+    }
+
+    fn has_energy(&self) -> bool {
+        self.energy > 0
     }
 }
 
@@ -34,7 +42,7 @@ impl Player {
 struct MainState {
     sprite_sheet: Image,
     player: Player,
-    controls: Vec<Box<dyn Control>>
+    controls: Vec<Box<dyn Control>>,
 }
 
 impl MainState {
@@ -45,7 +53,7 @@ impl MainState {
                 pos: [50.0, 50.0].into(),
                 src_rect: [0.0, 0.0, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
             },
-            controls: vec![Box::new(RightControl{})],
+            controls: vec![Box::new(RightControl { energy: 3 })],
         }
     }
 }
@@ -55,16 +63,25 @@ impl EventHandler for MainState {
         self.player.update(ctx)?;
         let keys = ggez::input::keyboard::pressed_keys(ctx);
         if keys.contains(&ggez::input::keyboard::KeyCode::L) {
-            self.controls[0].activate(&mut self.player)?;
+            if let Some(control) = self.controls.get_mut(0) {
+                control.activate(&mut self.player);
+            }
         }
+        self.controls.retain(|c| c.has_energy());
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::BLACK);
         let mut batch = SpriteBatch::new(self.sprite_sheet.clone());
-        batch.add(DrawParam::default().src(self.player.src_rect).dest(self.player.pos));
-        batch.draw(ctx, DrawParam::default().scale([2.0, 2.0])).unwrap();
+        batch.add(
+            DrawParam::default()
+                .src(self.player.src_rect)
+                .dest(self.player.pos),
+        );
+        batch
+            .draw(ctx, DrawParam::default().scale([2.0, 2.0]))
+            .unwrap();
         graphics::present(ctx).unwrap();
         Ok(())
     }
