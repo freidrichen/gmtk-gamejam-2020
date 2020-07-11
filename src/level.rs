@@ -7,8 +7,8 @@ use std::path::Path;
 
 use crate::gfx::{get_sprite, Sprite, SpriteType};
 
-const LEVEL_WIDTH: usize = 40;
-const LEVEL_HEIGHT: usize = 30;
+const LEVEL_WIDTH: usize = 20;
+const LEVEL_HEIGHT: usize = 15;
 
 #[derive(Clone, Copy)]
 pub enum TileType {
