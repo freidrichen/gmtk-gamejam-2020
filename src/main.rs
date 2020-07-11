@@ -1,15 +1,15 @@
 mod level;
+mod sprite;
 
-use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, Drawable, Image, Rect};
+use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, Drawable, Image};
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
 use level::Level;
+use sprite::{get_sprite, Sprite, SpriteType};
 
 const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
-const NUM_SPRITES_X: f32 = 8.0;
-const NUM_SPRITES_Y: f32 = 8.0;
 
 enum ControlType {
     Right,
@@ -38,7 +38,7 @@ impl Control {
 
 struct Player {
     pos: Point2<usize>,
-    src_rect: Rect,
+    sprite: Sprite,
 }
 
 impl Player {
@@ -61,7 +61,7 @@ impl MainState {
             sprite_sheet: Image::new(ctx, "/sprites.png")?,
             player: Player {
                 pos: level.player_start,
-                src_rect: [0.5, 0.5, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
+                sprite: get_sprite(SpriteType::Player),
             },
             level,
             controls: [
@@ -117,14 +117,14 @@ impl EventHandler for MainState {
                 let screen_y = tile_y as f32 * 8.0;
                 batch.add(
                     DrawParam::default()
-                        .src(self.level.get(tile_x, tile_y).unwrap().src_rect)
+                        .src(self.level.get(tile_x, tile_y).unwrap().sprite)
                         .dest(Point2::new(screen_x, screen_y)),
                 );
             }
         }
         batch.add(
             DrawParam::default()
-                .src(self.player.src_rect)
+                .src(self.player.sprite)
                 .dest(screen_pos(self.player.pos)),
         );
         batch

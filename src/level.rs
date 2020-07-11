@@ -1,38 +1,29 @@
 use ggez::filesystem;
-use ggez::graphics::Rect;
 use ggez::nalgebra::Point2;
 use ggez::{Context, GameResult};
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
+use crate::sprite::{get_sprite, Sprite, SpriteType};
+
 const LEVEL_WIDTH: usize = 40;
 const LEVEL_HEIGHT: usize = 30;
-const NUM_SPRITES_X: usize = 8;
-const NUM_SPRITES_Y: usize = 8;
-
-fn sprite(index: usize) -> Rect {
-    let row = index / NUM_SPRITES_X;
-    let col = index % NUM_SPRITES_X;
-    assert!(row < NUM_SPRITES_Y);
-    Rect::new(
-        row as f32 / NUM_SPRITES_X as f32,
-        col as f32 / NUM_SPRITES_Y as f32,
-        1.0 / NUM_SPRITES_X as f32,
-        1.0 / NUM_SPRITES_Y as f32,
-    )
-}
 
 #[derive(Clone, Copy)]
 pub struct Tile {
-    pub src_rect: Rect,
+    pub sprite: Sprite,
     pub passable: bool,
 }
 
 impl Tile {
     fn new(passable: bool) -> Tile {
-        let sprite_index: usize = passable as usize;
+        let sprite_type = if passable {
+            SpriteType::Floor
+        } else {
+            SpriteType::Wall
+        };
         Tile {
-            src_rect: sprite(sprite_index),
+            sprite: get_sprite(sprite_type),
             passable,
         }
     }
