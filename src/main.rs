@@ -4,44 +4,54 @@ use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
 const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
+const NUM_SPRITES_X: f32 = 8.0;
+const NUM_SPRITES_Y: f32 = 8.0;
+
+struct Player {
+    pos: Point2<f32>,
+    src_rect: Rect,
+}
+
+impl Player {
+    fn update(&mut self, ctx: &Context) -> GameResult<()> {
+        let keys = ggez::input::keyboard::pressed_keys(ctx);
+        if keys.contains(&ggez::input::keyboard::KeyCode::L) {
+            self.pos = self.pos + Vector2::new(10.0, 0.0);
+        }
+        Ok(())
+    }
+}
 
 struct MainState {
-    sprites: Vec<Sprite>,
     sprite_sheet: Image,
+    player: Player,
 }
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> MainState {
         MainState {
-            sprites: vec![Sprite {
-                src: [0.0, 0.0, 1.0 / 8.0, 1.0 / 8.0].into(),
-                dest: [50.0, 50.0].into(),
-            }],
             sprite_sheet: Image::new(ctx, "/sprites.png").unwrap(),
+            player: Player {
+                pos: [50.0, 50.0].into(),
+                src_rect: [0.0, 0.0, 1.0 / NUM_SPRITES_X, 1.0 / NUM_SPRITES_Y].into(),
+            },
         }
     }
 }
 
 impl EventHandler for MainState {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-        Ok(())
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        self.player.update(ctx)
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::BLACK);
         let mut batch = SpriteBatch::new(self.sprite_sheet.clone());
-        for sprite in &self.sprites {
-            batch.add(DrawParam::default().src(sprite.src).dest(sprite.dest));
-        }
-        batch.draw(ctx, DrawParam::default()).unwrap();
+        batch.add(DrawParam::default().src(self.player.src_rect).dest(self.player.pos));
+        batch.draw(ctx, DrawParam::default().scale([2.0, 2.0])).unwrap();
         graphics::present(ctx).unwrap();
         Ok(())
     }
-}
-
-struct Sprite {
-    src: Rect,
-    dest: Point2<f32>,
 }
 
 fn main() {
