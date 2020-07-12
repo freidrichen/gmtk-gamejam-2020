@@ -25,7 +25,9 @@ pub enum SpriteType {
     K,
     L,
     R,
+    Q,
     Restart,
+    Quit,
     Digit0,
     // Rest of digits are consecutive and are computed when needed.
 }
@@ -53,7 +55,9 @@ fn sprite_index(sprite_type: SpriteType) -> usize {
         SpriteType::K => 18,
         SpriteType::L => 19,
         SpriteType::R => 20,
+        SpriteType::Q => 21,
         SpriteType::Restart => 40,
+        SpriteType::Quit => 41,
         SpriteType::Digit0 => 54,
     }
 }

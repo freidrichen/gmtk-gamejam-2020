@@ -138,7 +138,7 @@ fn draw_control_status(controls: &[Option<Control>], pos: Point2<usize>, batch: 
         }
         row += 2;
     }
-    row += 1; // Let's have some extra space before other controls
+    row += 2; // Let's have some extra space before other controls
     batch.add(
         DrawParam::default()
             .src(gfx::get_sprite(SpriteType::R))
@@ -147,6 +147,17 @@ fn draw_control_status(controls: &[Option<Control>], pos: Point2<usize>, batch: 
     batch.add(
         DrawParam::default()
             .src(gfx::get_sprite(SpriteType::Restart))
+            .dest(gfx::screen_pos(Point2::new(start_col + 2, row))),
+    );
+    row += 2;
+    batch.add(
+        DrawParam::default()
+            .src(gfx::get_sprite(SpriteType::Q))
+            .dest(gfx::screen_pos(Point2::new(start_col, row))),
+    );
+    batch.add(
+        DrawParam::default()
+            .src(gfx::get_sprite(SpriteType::Quit))
             .dest(gfx::screen_pos(Point2::new(start_col + 2, row))),
     );
 }
