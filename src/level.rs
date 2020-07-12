@@ -70,6 +70,7 @@ impl Level {
         *tile = match c {
             '#' => Tile::new(TileType::Wall),
             '>' => Tile::new(TileType::Exit),
+            ' ' => Tile::new(TileType::Empty),
             _ => Tile::new(TileType::Floor),
         };
         match c {

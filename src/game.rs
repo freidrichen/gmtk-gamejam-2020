@@ -45,7 +45,7 @@ impl Player {
         let x = (self.pos.x as isize + delta.x) as usize;
         let y = (self.pos.y as isize + delta.y) as usize;
         let new_pos = match level.get(x, y).unwrap().tile_type {
-            TileType::Wall => self.pos,
+            TileType::Wall | TileType::Empty => self.pos,
             TileType::Floor | TileType::Exit => Point2::new(x, y),
         };
         self.pos = new_pos;
@@ -57,6 +57,7 @@ impl Player {
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum TileType {
+    Empty,
     Wall,
     Floor,
     Exit,
@@ -71,6 +72,7 @@ pub struct Tile {
 impl Tile {
     pub fn new(tile_type: TileType) -> Tile {
         let sprite_type = match tile_type {
+            TileType::Empty => SpriteType::Empty,
             TileType::Floor => SpriteType::Floor,
             TileType::Wall => SpriteType::Wall,
             TileType::Exit => SpriteType::Exit,

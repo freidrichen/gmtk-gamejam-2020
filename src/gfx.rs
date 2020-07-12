@@ -11,6 +11,7 @@ pub type Sprite = Rect;
 
 #[derive(Clone, Copy)]
 pub enum SpriteType {
+    Empty,
     Player,
     Wall,
     Floor,
@@ -36,6 +37,7 @@ pub fn screen_pos(tile_pos: Point2<usize>) -> Point2<f32> {
 
 fn sprite_index(sprite_type: SpriteType) -> usize {
     match sprite_type {
+        SpriteType::Empty => 24,
         SpriteType::Player => 8,
         SpriteType::Wall => 0,
         SpriteType::Floor => 1,
