@@ -44,14 +44,18 @@ pub struct Item {
 
 pub enum ItemType {
     DownControl,
+    LeftControl,
     UpControl,
+    RightControl,
 }
 
 impl Item {
     fn new(item_type: ItemType) -> Item {
         let sprite_type = match item_type {
-            ItemType::DownControl => SpriteType::DownControl,
             ItemType::UpControl => SpriteType::UpControl,
+            ItemType::RightControl => SpriteType::RightControl,
+            ItemType::DownControl => SpriteType::DownControl,
+            ItemType::LeftControl => SpriteType::LeftControl,
         };
         Item {
             sprite: get_sprite(sprite_type),
@@ -102,13 +106,21 @@ impl Level {
             '@' => {
                 self.player_start = Point2::new(col, row);
             }
-            'a' => {
+            'u' => {
+                self.items
+                    .insert((col, row), Item::new(ItemType::UpControl));
+            }
+            'r' => {
+                self.items
+                    .insert((col, row), Item::new(ItemType::RightControl));
+            }
+            'd' => {
                 self.items
                     .insert((col, row), Item::new(ItemType::DownControl));
             }
-            'b' => {
+            'l' => {
                 self.items
-                    .insert((col, row), Item::new(ItemType::UpControl));
+                    .insert((col, row), Item::new(ItemType::LeftControl));
             }
             _ => {}
         }

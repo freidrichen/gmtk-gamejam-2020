@@ -106,7 +106,9 @@ impl MainState {
 fn add_control(controls: &mut [Option<Control>], item_type: ItemType) {
     let control_type = match item_type {
         ItemType::UpControl => ControlType::Up,
+        ItemType::RightControl => ControlType::Right,
         ItemType::DownControl => ControlType::Down,
+        ItemType::LeftControl => ControlType::Left,
     };
     let control = Control {
         energy: 10,
