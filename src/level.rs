@@ -10,7 +10,7 @@ use crate::gfx::{get_sprite, Sprite, SpriteType};
 pub const LEVEL_WIDTH: usize = 20;
 pub const LEVEL_HEIGHT: usize = 15;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum TileType {
     Wall,
     Floor,
@@ -65,6 +65,7 @@ impl Item {
 }
 
 pub struct Level {
+    pub number: usize,
     pub width: usize,
     pub height: usize,
     pub player_start: Point2<usize>,
@@ -75,6 +76,7 @@ pub struct Level {
 impl Level {
     pub fn new() -> Level {
         Level {
+            number: 0,
             width: LEVEL_WIDTH,
             height: LEVEL_HEIGHT,
             player_start: Point2::new(0, 0),
@@ -83,8 +85,8 @@ impl Level {
         }
     }
 
-    pub fn load<P: AsRef<Path>>(ctx: &mut Context, filename: P) -> GameResult<Level> {
-        let file = filesystem::open(ctx, filename)?;
+    pub fn load(ctx: &mut Context, number: usize) -> GameResult<Level> {
+        let file = filesystem::open(ctx, format!("/level{}.txt", number))?;
         let reader = BufReader::new(file);
         let mut level = Level::new();
         for (row, line) in reader.lines().enumerate() {

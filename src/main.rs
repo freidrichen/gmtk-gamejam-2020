@@ -53,8 +53,7 @@ impl Player {
         let y = (self.pos.y as isize + delta.y) as usize;
         let new_pos = match level.get(x, y).unwrap().tile_type {
             TileType::Wall => self.pos,
-            TileType::Floor => Point2::new(x, y),
-            TileType::Exit => panic!("You win!"),
+            TileType::Floor | TileType::Exit => Point2::new(x, y),
         };
         self.pos = new_pos;
         if let Some(item) = level.items.remove(&(x, y)) {
@@ -73,7 +72,7 @@ struct MainState {
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> GameResult<MainState> {
-        let level = Level::load(ctx, "/level0.txt")?;
+        let level = Level::load(ctx, 0)?;
         Ok(MainState {
             sprite_sheet: Image::new(ctx, "/sprites.png")?,
             player: Player {
@@ -96,6 +95,12 @@ impl MainState {
             ],
             key_presses: Vec::new(),
         })
+    }
+
+    pub fn next_level(&mut self, ctx: &mut Context) {
+        let current_level = self.level.number;
+        self.level = Level::load(ctx, current_level + 1).unwrap();
+        self.player.pos = self.level.player_start;
     }
 
     fn out_of_control(&self) -> bool {
@@ -173,7 +178,7 @@ fn draw_control_status(controls: &[Option<Control>], pos: Point2<usize>, batch: 
 }
 
 impl EventHandler for MainState {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         for keycode in self.key_presses.drain(..) {
             let control_index = match keycode {
                 KeyCode::H => 0,
@@ -195,6 +200,15 @@ impl EventHandler for MainState {
         });
         for item_type in self.player.pending_items.drain(..) {
             add_control(&mut self.controls, item_type);
+        }
+        if self
+            .level
+            .get(self.player.pos.x, self.player.pos.y)
+            .unwrap()
+            .tile_type
+            == TileType::Exit
+        {
+            self.next_level(ctx);
         }
         if self.out_of_control() {
             panic!("You are out of controls! You lose!")
