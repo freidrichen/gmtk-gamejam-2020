@@ -20,13 +20,15 @@ pub struct Control {
 impl Control {
     pub fn activate(&mut self, player: &mut Player, level: &mut Level) {
         assert!(self.energy > 0);
-        self.energy -= 1;
-        match self.control_type {
+        let did_walk = match self.control_type {
             ControlType::Right => player.walk(level, Vector2::new(1, 0)),
             ControlType::Left => player.walk(level, Vector2::new(-1, 0)),
             ControlType::Up => player.walk(level, Vector2::new(0, -1)),
             ControlType::Down => player.walk(level, Vector2::new(0, 1)),
         };
+        if did_walk {
+            self.energy -= 1;
+        }
     }
 
     pub fn has_energy(&self) -> bool {
@@ -41,17 +43,18 @@ pub struct Player {
 }
 
 impl Player {
-    fn walk(&mut self, level: &mut Level, delta: Vector2<isize>) {
+    fn walk(&mut self, level: &mut Level, delta: Vector2<isize>) -> bool {
         let x = (self.pos.x as isize + delta.x) as usize;
         let y = (self.pos.y as isize + delta.y) as usize;
         let new_pos = match level.get(x, y).unwrap().tile_type {
-            TileType::Wall | TileType::Empty => self.pos,
+            TileType::Wall | TileType::Empty => return false,
             TileType::Floor | TileType::Exit => Point2::new(x, y),
         };
         self.pos = new_pos;
         if let Some(item) = level.items.remove(&(x, y)) {
             self.pending_items.push(item.item_type);
         }
+        return true;
     }
 }
 
