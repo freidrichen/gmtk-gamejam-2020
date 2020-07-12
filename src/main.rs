@@ -27,8 +27,8 @@ struct MainState {
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> GameResult<MainState> {
-        let level = Level::load(ctx, 0)?;
-        Ok(MainState {
+        let level = Level::new();
+        let mut state = MainState {
             sprite_sheet: Image::new(ctx, "/sprites.png")?,
             lose_banner: Image::new(ctx, "/lose_banner.png")?,
             player: Player {
@@ -38,17 +38,16 @@ impl MainState {
             },
             level,
             controls: [
-                Some(Control {
-                    energy: 15,
-                    control_type: ControlType::Left,
-                }),
+                None,
                 None,
                 None,
                 None,
             ],
             key_presses: Vec::new(),
             lost: false,
-        })
+        };
+        state.load_level(ctx, 0);
+        Ok(state)
     }
 
     pub fn next_level(&mut self, ctx: &mut Context) {
