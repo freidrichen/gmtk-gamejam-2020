@@ -73,7 +73,7 @@ struct MainState {
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> GameResult<MainState> {
-        let level = Level::load(ctx, "/level.txt")?;
+        let level = Level::load(ctx, "/level0.txt")?;
         Ok(MainState {
             sprite_sheet: Image::new(ctx, "/sprites.png")?,
             player: Player {
