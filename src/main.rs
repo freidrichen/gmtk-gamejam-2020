@@ -40,10 +40,7 @@ impl MainState {
                 }),
                 None,
                 None,
-                Some(Control {
-                    energy: 10,
-                    control_type: ControlType::Right,
-                }),
+                None,
             ],
             key_presses: Vec::new(),
         })
