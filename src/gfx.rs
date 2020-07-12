@@ -3,7 +3,7 @@ use ggez::nalgebra::Point2;
 
 const NUM_SPRITES_X: usize = 8;
 const NUM_SPRITES_Y: usize = 8;
-const SPRITE_WIDTH: usize = 8;
+pub const SPRITE_WIDTH: usize = 8;
 const SPRITE_HEIGHT: usize = 8;
 pub const SPRITE_SCALE: f32 = 4.0;
 

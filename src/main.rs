@@ -2,6 +2,7 @@ mod game;
 mod gfx;
 mod level;
 
+use ggez::conf::FullscreenType;
 use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, Drawable, Image};
 use ggez::input::keyboard::{KeyCode, KeyMods};
 use ggez::nalgebra::{Point2, Vector2};
@@ -13,6 +14,7 @@ use gfx::{get_sprite, SpriteType};
 use level::Level;
 
 const SCREEN_SIZE: (f32, f32) = (1000.0, 600.0);
+use level::Level;
 
 struct MainState {
     sprite_sheet: Image,
@@ -198,7 +200,20 @@ impl EventHandler for MainState {
         batch
             .draw(
                 ctx,
-                DrawParam::default().scale([gfx::SPRITE_SCALE, gfx::SPRITE_SCALE]),
+                DrawParam::default()
+                    .scale([gfx::SPRITE_SCALE, gfx::SPRITE_SCALE])
+                    .dest(Point2::new(
+                        (SCREEN_SIZE.0
+                            - (level::LEVEL_WIDTH + 7) as f32
+                                * gfx::SPRITE_SCALE
+                                * gfx::SPRITE_WIDTH as f32)
+                            / 2.0,
+                        (SCREEN_SIZE.1
+                            - level::LEVEL_HEIGHT as f32
+                                * gfx::SPRITE_SCALE
+                                * gfx::SPRITE_WIDTH as f32)
+                            / 2.0,
+                    )),
             )
             .unwrap();
         graphics::present(ctx).unwrap();
@@ -223,7 +238,11 @@ fn main() {
                 .title("NoCtrl")
                 .vsync(true),
         )
-        .window_mode(ggez::conf::WindowMode::default().dimensions(SCREEN_SIZE.0, SCREEN_SIZE.1));
+        .window_mode(
+            ggez::conf::WindowMode::default()
+                .dimensions(SCREEN_SIZE.0, SCREEN_SIZE.1)
+                .fullscreen_type(FullscreenType::Desktop),
+        );
 
     // Setup 'resources' dir in cargo project dir.
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
