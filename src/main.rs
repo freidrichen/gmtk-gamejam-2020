@@ -60,6 +60,7 @@ impl MainState {
     }
 
     fn load_level(&mut self, ctx: &mut Context, level_number: usize) {
+        self.key_presses.clear();
         self.level = Level::load(ctx, level_number).unwrap();
         self.player.pos = self.level.player_start;
         self.controls = self.level.controls_start.clone();
@@ -152,17 +153,12 @@ fn draw_control_status(controls: &[Option<Control>], pos: Point2<usize>, batch: 
 
 impl EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        let mut restart = false;
         for keycode in self.key_presses.drain(..) {
             let control_index = match keycode {
                 KeyCode::H => 0,
                 KeyCode::J => 1,
                 KeyCode::K => 2,
                 KeyCode::L => 3,
-                KeyCode::R => {
-                    restart = true;
-                    continue;
-                }
                 _ => continue,
             };
             if let Some(Some(control)) = self.controls.get_mut(control_index) {
@@ -178,9 +174,6 @@ impl EventHandler for MainState {
         });
         for item_type in self.player.pending_items.drain(..) {
             add_control(&mut self.controls, item_type);
-        }
-        if restart {
-            self.reload_level(ctx);
         }
         if self
             .level
@@ -257,12 +250,16 @@ impl EventHandler for MainState {
 
     fn key_down_event(
         &mut self,
-        _ctx: &mut Context,
+        ctx: &mut Context,
         keycode: KeyCode,
         _keymods: KeyMods,
         _repeat: bool,
     ) {
-        self.key_presses.push(keycode);
+        match keycode {
+            KeyCode::R => self.reload_level(ctx),
+            KeyCode::Q => ggez::event::quit(ctx),
+            _ => self.key_presses.push(keycode),
+        };
     }
 }
 
