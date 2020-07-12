@@ -17,10 +17,12 @@ const SCREEN_SIZE: (f32, f32) = (1000.0, 600.0);
 
 struct MainState {
     sprite_sheet: Image,
+    lose_banner: Image,
     key_presses: Vec<KeyCode>,
     player: Player,
     level: Level,
     controls: [Option<Control>; 4],
+    lost: bool,
 }
 
 impl MainState {
@@ -28,6 +30,7 @@ impl MainState {
         let level = Level::load(ctx, 0)?;
         Ok(MainState {
             sprite_sheet: Image::new(ctx, "/sprites.png")?,
+            lose_banner: Image::new(ctx, "/lose_banner.png")?,
             player: Player {
                 pos: level.player_start,
                 sprite: get_sprite(SpriteType::Player),
@@ -44,6 +47,7 @@ impl MainState {
                 None,
             ],
             key_presses: Vec::new(),
+            lost: false,
         })
     }
 
@@ -187,9 +191,7 @@ impl EventHandler for MainState {
         {
             self.next_level(ctx);
         }
-        if self.out_of_control() {
-            panic!("You are out of controls! You lose!")
-        }
+        self.lost = self.out_of_control();
         Ok(())
     }
 
@@ -241,6 +243,14 @@ impl EventHandler for MainState {
                     )),
             )
             .unwrap();
+        if self.lost {
+            ggez::graphics::draw(
+                ctx,
+                &self.lose_banner,
+                DrawParam::default().scale([gfx::SPRITE_SCALE, gfx::SPRITE_SCALE]),
+            )
+            .unwrap();
+        }
         graphics::present(ctx).unwrap();
         Ok(())
     }
