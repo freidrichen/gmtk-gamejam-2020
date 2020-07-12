@@ -48,8 +48,15 @@ impl MainState {
     }
 
     pub fn next_level(&mut self, ctx: &mut Context) {
-        let current_level = self.level.number;
-        self.level = Level::load(ctx, current_level + 1).unwrap();
+        self.load_level(ctx, self.level.number + 1);
+    }
+
+    pub fn reload_level(&mut self, ctx: &mut Context) {
+        self.load_level(ctx, self.level.number);
+    }
+
+    fn load_level(&mut self, ctx: &mut Context, level_number: usize) {
+        self.level = Level::load(ctx, level_number).unwrap();
         self.player.pos = self.level.player_start;
         self.controls = self.level.controls_start.clone();
     }
@@ -130,12 +137,17 @@ fn draw_control_status(controls: &[Option<Control>], pos: Point2<usize>, batch: 
 
 impl EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        let mut restart = false;
         for keycode in self.key_presses.drain(..) {
             let control_index = match keycode {
                 KeyCode::H => 0,
                 KeyCode::J => 1,
                 KeyCode::K => 2,
                 KeyCode::L => 3,
+                KeyCode::R => {
+                    restart = true;
+                    continue;
+                }
                 _ => continue,
             };
             if let Some(Some(control)) = self.controls.get_mut(control_index) {
@@ -151,6 +163,9 @@ impl EventHandler for MainState {
         });
         for item_type in self.player.pending_items.drain(..) {
             add_control(&mut self.controls, item_type);
+        }
+        if restart {
+            self.reload_level(ctx);
         }
         if self
             .level
