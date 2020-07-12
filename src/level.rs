@@ -26,7 +26,7 @@ impl Level {
             width: LEVEL_WIDTH,
             height: LEVEL_HEIGHT,
             player_start: Point2::new(0, 0),
-            tiles: vec![Tile::new(TileType::Floor); LEVEL_WIDTH * LEVEL_HEIGHT],
+            tiles: vec![Tile::new(TileType::Empty); LEVEL_WIDTH * LEVEL_HEIGHT],
             items: HashMap::new(),
             controls_start: [None, None, None, None],
         }
