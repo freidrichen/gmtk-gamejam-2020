@@ -268,6 +268,7 @@ impl EventHandler for MainState {
     ) {
         match keycode {
             KeyCode::R => self.reload_level(ctx),
+            KeyCode::N => self.next_level(ctx),
             KeyCode::Q => ggez::event::quit(ctx),
             _ => self.key_presses.push(keycode),
         };
