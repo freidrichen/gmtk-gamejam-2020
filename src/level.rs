@@ -4,7 +4,7 @@ use ggez::{Context, GameResult};
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
 
-use crate::game::{Item, ItemType, Tile, TileType};
+use crate::game::{Control, ControlType, Item, ItemType, Tile, TileType};
 
 pub const LEVEL_WIDTH: usize = 20;
 pub const LEVEL_HEIGHT: usize = 15;
@@ -16,6 +16,7 @@ pub struct Level {
     pub player_start: Point2<usize>,
     tiles: Vec<Tile>,
     pub items: HashMap<(usize, usize), Item>,
+    pub controls_start: [Option<Control>; 4],
 }
 
 impl Level {
@@ -27,17 +28,39 @@ impl Level {
             player_start: Point2::new(0, 0),
             tiles: vec![Tile::new(TileType::Floor); LEVEL_WIDTH * LEVEL_HEIGHT],
             items: HashMap::new(),
+            controls_start: [None, None, None, None],
         }
     }
 
     pub fn load(ctx: &mut Context, number: usize) -> GameResult<Level> {
         let file = filesystem::open(ctx, format!("/level{}.txt", number))?;
         let reader = BufReader::new(file);
+        let mut lines = reader.lines();
         let mut level = Level::new();
-        for (row, line) in reader.lines().enumerate() {
+        for (row, line) in lines.by_ref().take(LEVEL_HEIGHT).enumerate() {
             for (col, c) in line.unwrap().chars().enumerate() {
                 level.set_from_char(col, row, c);
             }
+        }
+        for (i, line) in lines.by_ref().take(4).enumerate() {
+            let line = line.unwrap();
+            level.controls_start[i] = if line.len() > 0 {
+                let parts: Vec<_> = line.split(" ").collect();
+                let control_type = match parts[0] {
+                    "<" => ControlType::Left,
+                    ">" => ControlType::Right,
+                    "v" => ControlType::Down,
+                    "^" => ControlType::Up,
+                    _ => panic!(),
+                };
+                let energy: u32 = parts[1].parse().unwrap();
+                Some(Control {
+                    control_type,
+                    energy,
+                })
+            } else {
+                None
+            };
         }
         Ok(level)
     }

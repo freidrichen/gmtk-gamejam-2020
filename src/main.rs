@@ -8,9 +8,9 @@ use ggez::nalgebra::{Point2, Vector2};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
-use level::Level;
-use game::{Player, Control, ItemType, TileType, ControlType};
+use game::{Control, ControlType, ItemType, Player, TileType};
 use gfx::{get_sprite, SpriteType};
+use level::Level;
 
 const SCREEN_SIZE: (f32, f32) = (1000.0, 600.0);
 
@@ -50,6 +50,7 @@ impl MainState {
         let current_level = self.level.number;
         self.level = Level::load(ctx, current_level + 1).unwrap();
         self.player.pos = self.level.player_start;
+        self.controls = self.level.controls_start.clone();
     }
 
     fn out_of_control(&self) -> bool {

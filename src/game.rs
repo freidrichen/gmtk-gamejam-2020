@@ -3,6 +3,7 @@ use ggez::nalgebra::{Point2, Vector2};
 use crate::gfx::{get_sprite, Sprite, SpriteType};
 use crate::level::Level;
 
+#[derive(Clone)]
 pub enum ControlType {
     Right,
     Left,
@@ -10,6 +11,7 @@ pub enum ControlType {
     Down,
 }
 
+#[derive(Clone)]
 pub struct Control {
     pub energy: u32,
     pub control_type: ControlType,
