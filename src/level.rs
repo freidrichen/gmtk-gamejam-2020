@@ -37,6 +37,7 @@ impl Level {
         let reader = BufReader::new(file);
         let mut lines = reader.lines();
         let mut level = Level::new();
+        level.number = number;
         for (row, line) in lines.by_ref().take(LEVEL_HEIGHT).enumerate() {
             for (col, c) in line.unwrap().chars().enumerate() {
                 level.set_from_char(col, row, c);
