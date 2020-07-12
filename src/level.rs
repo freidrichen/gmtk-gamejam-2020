@@ -3,66 +3,11 @@ use ggez::nalgebra::Point2;
 use ggez::{Context, GameResult};
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
-use std::path::Path;
 
-use crate::gfx::{get_sprite, Sprite, SpriteType};
+use crate::game::{Item, ItemType, Tile, TileType};
 
 pub const LEVEL_WIDTH: usize = 20;
 pub const LEVEL_HEIGHT: usize = 15;
-
-#[derive(Clone, Copy, PartialEq)]
-pub enum TileType {
-    Wall,
-    Floor,
-    Exit,
-}
-
-#[derive(Clone, Copy)]
-pub struct Tile {
-    pub sprite: Sprite,
-    pub tile_type: TileType,
-}
-
-impl Tile {
-    fn new(tile_type: TileType) -> Tile {
-        let sprite_type = match tile_type {
-            TileType::Floor => SpriteType::Floor,
-            TileType::Wall => SpriteType::Wall,
-            TileType::Exit => SpriteType::Exit,
-        };
-        Tile {
-            sprite: get_sprite(sprite_type),
-            tile_type,
-        }
-    }
-}
-
-pub struct Item {
-    pub sprite: Sprite,
-    pub item_type: ItemType,
-}
-
-pub enum ItemType {
-    DownControl,
-    LeftControl,
-    UpControl,
-    RightControl,
-}
-
-impl Item {
-    fn new(item_type: ItemType) -> Item {
-        let sprite_type = match item_type {
-            ItemType::UpControl => SpriteType::UpControl,
-            ItemType::RightControl => SpriteType::RightControl,
-            ItemType::DownControl => SpriteType::DownControl,
-            ItemType::LeftControl => SpriteType::LeftControl,
-        };
-        Item {
-            sprite: get_sprite(sprite_type),
-            item_type,
-        }
-    }
-}
 
 pub struct Level {
     pub number: usize,

@@ -1,3 +1,4 @@
+mod game;
 mod gfx;
 mod level;
 
@@ -7,60 +8,11 @@ use ggez::nalgebra::{Point2, Vector2};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
-use level::{ItemType, Level, TileType};
+use level::Level;
+use game::{Player, Control, ItemType, TileType, ControlType};
+use gfx::{get_sprite, SpriteType};
 
 const SCREEN_SIZE: (f32, f32) = (1000.0, 600.0);
-use gfx::{get_sprite, Sprite, SpriteType};
-
-enum ControlType {
-    Right,
-    Left,
-    Up,
-    Down,
-}
-
-struct Control {
-    energy: u32,
-    control_type: ControlType,
-}
-
-impl Control {
-    fn activate(&mut self, player: &mut Player, level: &mut Level) {
-        assert!(self.energy > 0);
-        self.energy -= 1;
-        match self.control_type {
-            ControlType::Right => player.walk(level, Vector2::new(1, 0)),
-            ControlType::Left => player.walk(level, Vector2::new(-1, 0)),
-            ControlType::Up => player.walk(level, Vector2::new(0, -1)),
-            ControlType::Down => player.walk(level, Vector2::new(0, 1)),
-        };
-    }
-
-    fn has_energy(&self) -> bool {
-        self.energy > 0
-    }
-}
-
-struct Player {
-    pos: Point2<usize>,
-    sprite: Sprite,
-    pending_items: Vec<ItemType>,
-}
-
-impl Player {
-    fn walk(&mut self, level: &mut Level, delta: Vector2<isize>) {
-        let x = (self.pos.x as isize + delta.x) as usize;
-        let y = (self.pos.y as isize + delta.y) as usize;
-        let new_pos = match level.get(x, y).unwrap().tile_type {
-            TileType::Wall => self.pos,
-            TileType::Floor | TileType::Exit => Point2::new(x, y),
-        };
-        self.pos = new_pos;
-        if let Some(item) = level.items.remove(&(x, y)) {
-            self.pending_items.push(item.item_type);
-        }
-    }
-}
 
 struct MainState {
     sprite_sheet: Image,
