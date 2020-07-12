@@ -65,7 +65,7 @@ fn add_control(controls: &mut [Option<Control>], item_type: ItemType) {
         ItemType::LeftControl => ControlType::Left,
     };
     let control = Control {
-        energy: 10,
+        energy: 5,
         control_type,
     };
     for control_holder in controls.iter_mut() {
