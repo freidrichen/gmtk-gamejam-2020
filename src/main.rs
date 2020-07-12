@@ -14,7 +14,6 @@ use gfx::{get_sprite, SpriteType};
 use level::Level;
 
 const SCREEN_SIZE: (f32, f32) = (1000.0, 600.0);
-use level::Level;
 
 struct MainState {
     sprite_sheet: Image,
