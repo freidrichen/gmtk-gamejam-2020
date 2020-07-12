@@ -7,9 +7,9 @@ use ggez::nalgebra::{Point2, Vector2};
 use ggez::{self, event::EventHandler, Context, GameResult};
 use std::{env, path};
 
-use level::{Level, TileType, ItemType};
+use level::{ItemType, Level, TileType};
 
-const SCREEN_SIZE: (f32, f32) = (800.0, 600.0);
+const SCREEN_SIZE: (f32, f32) = (1000.0, 600.0);
 use gfx::{get_sprite, Sprite, SpriteType};
 
 enum ControlType {
@@ -103,23 +103,70 @@ impl MainState {
     }
 }
 
-fn add_control(controls: &mut [Option<Control>] , item_type:ItemType) {
+fn add_control(controls: &mut [Option<Control>], item_type: ItemType) {
     let control_type = match item_type {
         ItemType::UpControl => ControlType::Up,
         ItemType::DownControl => ControlType::Down,
     };
     let control = Control {
-        energy : 10,
+        energy: 10,
         control_type,
     };
     for control_holder in controls.iter_mut() {
         match control_holder {
-            Some(_) => {},
+            Some(_) => {}
             None => {
                 *control_holder = Some(control);
                 break;
-            },
+            }
         }
+    }
+}
+
+fn draw_number(number: usize, num_digits: usize, tile_pos: Point2<usize>, batch: &mut SpriteBatch) {
+    assert!(number < 10_usize.pow(num_digits as u32));
+    let mut remaining = number;
+    let mut leading_zero = true;
+    for position in (0..num_digits).rev() {
+        let digit = remaining / 10_usize.pow(position as u32);
+        remaining -= digit * 10_usize.pow(position as u32);
+        match (digit, leading_zero) {
+            (0, true) => {}
+            (_, _) => {
+                leading_zero = false;
+                batch.add(DrawParam::default().src(gfx::get_digit_sprite(digit)).dest(
+                    gfx::screen_pos(tile_pos + Vector2::new((num_digits - 1) - position, 0)),
+                ));
+            }
+        }
+    }
+}
+
+fn draw_control_status(controls: &[Option<Control>], pos: Point2<usize>, batch: &mut SpriteBatch) {
+    let mut row = pos.y;
+    let start_col = pos.x;
+    let action_sprites = [SpriteType::H, SpriteType::J, SpriteType::K, SpriteType::L];
+    for (index, sprite_type) in action_sprites.iter().enumerate() {
+        batch.add(
+            DrawParam::default()
+                .src(gfx::get_sprite(*sprite_type))
+                .dest(gfx::screen_pos(Point2::new(start_col, row))),
+        );
+        if let Some(Some(c)) = controls.get(index) {
+            batch.add(
+                DrawParam::default()
+                    .src(gfx::get_sprite(match c.control_type {
+                        ControlType::Up => SpriteType::UpControl,
+                        ControlType::Right => SpriteType::RightControl,
+                        ControlType::Down => SpriteType::DownControl,
+                        ControlType::Left => SpriteType::LeftControl,
+                    }))
+                    .dest(gfx::screen_pos(Point2::new(start_col + 2, row))),
+            );
+
+            draw_number(c.energy as usize, 2, Point2::new(start_col + 4, row), batch);
+        }
+        row += 2;
     }
 }
 
@@ -176,6 +223,11 @@ impl EventHandler for MainState {
             DrawParam::default()
                 .src(self.player.sprite)
                 .dest(gfx::screen_pos(self.player.pos)),
+        );
+        draw_control_status(
+            &self.controls,
+            Point2::new(level::LEVEL_WIDTH + 1, 1),
+            &mut batch,
         );
         batch
             .draw(
